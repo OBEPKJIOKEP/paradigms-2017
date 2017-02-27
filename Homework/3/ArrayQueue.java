@@ -44,17 +44,30 @@ public class ArrayQueue {
         elements = new Object[5];
     }
 
+    public Object[] toArray() {
+        return expandArray(size);
+    }
+
+    private Object[] expandArray(int newArraySize) {
+        Object[] newElements = new Object[newArraySize];
+        if(size == 0) {
+            return newElements;
+        }
+        if(begin < end) {
+            System.arraycopy(elements, begin, newElements, 0, size);
+        } else {
+            System.arraycopy(elements, begin, newElements, 0, elements.length - begin);
+            System.arraycopy(elements, 0, newElements, elements.length - begin, end);
+        }
+        return newElements;
+    }
+
     private void ensureCapacity(int capacity) {
         if (capacity <= elements.length) {
             return;
         }
-        Object[] newElements = new Object[2 * capacity];
-        int i = begin, j = 0;
-        while (i < (begin != end ? end : end + elements.length)) {
-            newElements[j++] = elements[(i++) % elements.length];
-        }
+        elements = expandArray(2 * capacity);
         end = size;
         begin = 0;
-        elements = newElements;
     }
 }
