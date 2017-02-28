@@ -2,12 +2,13 @@
  * Created by Greg on 23.02.2017.
  */
 
-// inv: begin ≥ 0 ∧ end ≥ 0 ∧ size ≥ 0 ∧ (end > begin, ∀i ∈ [begin, end) a[i] ≠ null ∨ 
-// ∨ (end <= begin ∧ size ≠ 0), ∀i ∈ [begin, a.size] ∪ [0, end) a[i] ≠ null)
+// inv: begin ∈ [0, a.length] ∧ end ∈ [0, a.length] ∧ size ≥ 0 ∧ 
+// ∧ (end > begin, ∀i ∈ [begin, end) a[i] ≠ null ∨ 
+// ∨ (end ≤ begin ∧ size ≠ 0), ∀i ∈ [begin, a.length] ∪ [0, end) a[i] ≠ null)
 
 // immutable = begin = begin' ∧ end = end' ∧ 
 // ((end > begin, ∀i ∈ [begin, end) a[i] = a[i]') ∨ 
-// ∨ (end <= begin ∧ size ≠ 0, ∀i ∈ [begin, a.size] ∪ [0, end) a[i] = a[i]'))
+// ∨ (end ≤ begin ∧ size ≠ 0, ∀i ∈ [begin, a.length] ∪ [0, end) a[i] = a[i]'))
 public class ArrayQueueModule {
     private static int begin = 0, end = 0, size = 0;
     private static Object[] elements = new Object[5];
@@ -15,8 +16,8 @@ public class ArrayQueueModule {
     // pre: element ≠ null
     // post: end = (end' + 1) % a.length ∧ size = size' + 1 ∧
     // ∧ begin = begin' ∧ a[end'] = element ∧ 
-    // ∧ ((end' > begin, ∀i ∈ [begin, end') a[i] = a[i]') ∨ 
-    // ∨ (end' ≤ begin ∧ size ≠ 0, ∀i ∈ [begin, a.size] ∪ [0, end') a[i] = a[i]'))
+    // ∧ (end' > begin, ∀i ∈ [begin, end') a[i] = a[i]') ∨ 
+    // ∨ (end' ≤ begin ∧ size ≠ 0, ∀i ∈ [begin, a.length] ∪ [0, end') a[i] = a[i]')
     public static void enqueue(Object element) {
         assert element != null;
 
@@ -37,8 +38,8 @@ public class ArrayQueueModule {
     // pre: size > 0
     // post: R = a[begin] ∧ begin = (begin' + 1) % a.length ∧ 
     // ∧ size = size' - 1 ∧ end = end' ∧
-    // ∧ ((end > begin, ∀i ∈ [begin, end) a[i] = a[i]') ∨ 
-    // ∨ (end ≤ begin ∧ size ≠ 0, ∀i ∈ [begin, a.size] ∪ [0, end) a[i] = a[i]')) 
+    // ∧ (end > begin, ∀i ∈ [begin, end) a[i] = a[i]') ∨ 
+    // ∨ (end ≤ begin ∧ size ≠ 0, ∀i ∈ [begin, a.length] ∪ [0, end) a[i] = a[i]') 
     public static Object dequeue() {
         assert size() > 0;
 
@@ -67,11 +68,19 @@ public class ArrayQueueModule {
         elements = new Object[5];
     }
 
+    // post:(end > begin, ∀i ∈ [begin, end) R[i - begin] = a[i]) ∨ 
+    // ∨ (end ≤ begin ∧ size ≠ 0, ∀i ∈ [begin, a.length] R[i - begin] = a[i], 
+    // ∀i ∈ [0, end) R[i + (a.length - begin)] = a[i]) ∧ immutable
     public static Object[] toArray() {
-        return expandArray(size);
+        return expandQueue(size);
     }
 
-    private static Object[] expandArray(int newArraySize) {
+    // pre: newArraySize ≥ size
+    // post: (end > begin, ∀i ∈ [begin, end) R[i - begin] = a[i]) ∨ 
+    // ∨ (end ≤ begin ∧ size ≠ 0, ∀i ∈ [begin, a.length) R[i - begin] = a[i], 
+    // ∀i ∈ [0, end) R[i + (a.length - begin)] = a[i]) ∧ 
+    // ∧ ∀i ∈ [size, newArraySize) R[i] = null ∧ immutable
+    private static Object[] expandQueue(int newArraySize) {
         Object[] newElements = new Object[newArraySize];
         if(size == 0) {
             return newElements;
@@ -85,11 +94,18 @@ public class ArrayQueueModule {
         return newElements;
     }
 
+    // pre: capacity > 0
+    // post: (immutable, capacity ≤ a.length ) ∨
+    // ∨ ((begin = 0 ∧ end = size ∧ size = size' ∧ 
+    // ∧ (end' > begin', ∀i ∈ [begin', end') a[i - begin'] = a[i]') ∨ 
+    // ∨ (end' ≤ begin' ∧ size' ≠ 0, ∀i ∈ [begin', a.length') a[i - begin'] = a[i]' ∧  
+    // ∧ ∀i ∈ [0, end') a[i + (a.length' - begin')] = a[i]') ∧ 
+    // ∧ ∀i ∈ [size', 2 * capacity) a[i] = null), capacity > a.length)
     private static void ensureCapacity(int capacity) {
         if (capacity <= elements.length) {
             return;
         }
-        elements = expandArray(2 * capacity);
+        elements = expandQueue(2 * capacity);
         end = size;
         begin = 0;
     }
