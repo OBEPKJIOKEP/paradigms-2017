@@ -6,26 +6,20 @@ import java.util.Arrays;
 public class BinarySearchMissing {
 
     public static void main(String[] args) {
-        Realisation realisationChosen = Realisation.RECURSIVE; 
+        boolean implementation = true; // true - iterative, false - recursive
+        int key = Integer.parseInt(args[0]);
         int[] array = Arrays.stream(args).skip(1).mapToInt(Integer::parseInt).toArray();
-        switch (realisationChosen) {
-            case ITERATIVE:
-                System.out.println(iterBinarySearch(Integer.parseInt(args[0]), array));
-                break;
-            case RECURSIVE:
-                System.out.println(recursiveBinarySearch(Integer.parseInt(args[0]), array, -1, array.length));
-                break;
-            default:
-                break;
-        }
+        System.out.println(implementation ? 
+                                    iterBinarySearch(key, array) : 
+                                    recursiveBinarySearch(key, array, -1, array.length));
     }
 
     // ip(insertion point) = (∃i: key ≥ a[i], min{i | key ≥ a[i]}) ∨
-    // ∨ ip = (∄i: key ≥ a[i], a.length)
+    // ∨ ip = (∄i: key = a[i], a.length)
 
-    // pre: i, j ∈ [0, a.length):  i ≤ j a[i] ≥ a[j]
-    // post: (R = ip, ip < a.length ∧ array[ip] == key) ∨ 
-    // ∨ (R = -ip - 1, !(ip < a.length ∧ array[ip] == key)   
+    // pre: i, j ∈ [0, a.length):  i ≤ j a[i] ≥ a[j] ∧ a[-1] = +∞ ∧ a[a.length] = -∞
+    // post: (R = ip, ip ≤ a.length ∧ array[ip] == key) ∨
+    // ∨ (R = -ip - 1, !(ip ≤ a.length ∧ array[ip] == key)
     static int iterBinarySearch(int key, int[] array) {
         int l = -1, r = array.length;
         // inv: l < ip ≤ r
@@ -45,24 +39,27 @@ public class BinarySearchMissing {
                 // l < ip ≤ r - inv
             }
         }
-        // r - 1 ≤ l(not while) < r(inv) ∧ l < ip ≤ r(inv) => 
-        // => (l = r - 1) ∧ l < ip ≤ r => 
+        // r - 1 ≤ l(not while) < r(inv) ∧ l < ip ≤ r(inv) =>
+        // => (l = r - 1) ∧ l < ip ≤ r =>
         // => ip = r
         return (r < array.length && array[r] == key) ? r : -r - 1;// obvious cause post
     }
 
-     // pre: -1 ≤ l < ip ≤ r ≤ a.length ∧
+    // ip(insertion point) = (∃i: key ≥ a[i], min{i | key ≥ a[i]}) ∨
+    // ∨ ip = (∄i: key = a[i], a.length)
+
+     // pre: -1 ≤ l < ip ≤ r ≤ a.length ∧ a[-1] = +∞ ∧ a[a.length] = -∞
      // ∧ i, j ∈ [0, a.length):  i ≤ j a[i] ≥ a[j]
-     // post: (R = ip, ip < a.length ∧ array[ip] == key) ∨ 
+     // post: (R = ip, ip < a.length ∧ array[ip] == key) ∨
      // ∨ (R = -ip - 1, !(ip < a.length ∧ array[ip] == key)
     static int recursiveBinarySearch(int key, int[] array, int l, int r) {
         if (r - l <= 1) {
-            // r - 1 ≤ l(not while) < r(inv) ∧ l < ip ≤ r(inv) => 
-            // => (l = r - 1) ∧ l < ip ≤ r => 
+            // r - 1 ≤ l(not while) < r(inv) ∧ l < ip ≤ r(inv) =>
+            // => (l = r - 1) ∧ l < ip ≤ r =>
             // => ip = r
             return (r < array.length && array[r] == key) ? r : -r - 1;// obvious cause post
         }
-        int m = (l + r) / 2; // l < m ≤ r, m - середина (l, r] 
+        int m = (l + r) / 2; // l < m ≤ r, m - середина (l, r]
         if (array[m] > key) {
             // pre ∧ (a[0] ≥ a[m] > key) => m < ip
             // pre ∧ inv ∧ (l < m < ip) => m < ip ≤ r
@@ -79,7 +76,4 @@ public class BinarySearchMissing {
             return recursiveBinarySearch(key, array, l, m);
         }
     }
-}
-enum Realisation {
-    ITERATIVE, RECURSIVE
 }
