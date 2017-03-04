@@ -69,44 +69,40 @@ public class ArrayQueue {
         elements = new Object[5];
     }
 
-    // post:(end > begin, ∀i ∈ [begin, end) R[i - begin] = a[i]) ∨ 
-    // ∨ (end ≤ begin ∧ size ≠ 0, ∀i ∈ [begin, a.length] R[i - begin] = a[i], 
-    // ∀i ∈ [0, end) R[i + (a.length - begin)] = a[i]) ∧ immutable
-    public Object[] toArray() {
-        return expandQueue(size);
-    }
-
-    // pre: newArraySize ≥ size
-    // post: (end > begin, ∀i ∈ [begin, end) R[i - begin] = a[i]) ∨ 
-    // ∨ (end ≤ begin ∧ size ≠ 0, ∀i ∈ [begin, a.length) R[i - begin] = a[i], 
-    // ∀i ∈ [0, end) R[i + (a.length - begin)] = a[i]) ∧ 
-    // ∧ ∀i ∈ [size, newArraySize) R[i] = null ∧ immutable
-    private Object[] expandQueue(int newArraySize) {
-        Object[] newElements = new Object[newArraySize];
+    // post:(end > begin, R = "[a[begin], ..., a[end - 1]]") ∨
+    // ∨ (end ≤ begin ∧ size ≠ 0, R = "[a[begin], ..., a[a.length - 1], a[0], ..., a[end - 1]]" ∧
+    // ∧ immutable  
+    public String toStr() {
         if(size == 0) {
-            return newElements;
+            return "[]";
         }
+        StringBuilder sb = new StringBuilder();
+        int i = begin;
+        while(i < (begin < end ? end : end + elements.length)) {
+          sb.append(", ").append(elements[i++ % elements.length]);
+        }
+        return "[" + sb.substring(2) + "]";
+    }
+    
+    // pre: capacity > 0
+    // post: (immutable, capacity ≤ a.length ) ∨
+    // ∨ ((begin = 0 ∧ end = size ∧ size = size' ∧
+    // ∧ (end' > begin', ∀i ∈ [begin', end') a[i - begin'] = a[i]') ∨
+    // ∨ (end' ≤ begin' ∧ size' ≠ 0, ∀i ∈ [begin', a.length') a[i - begin'] = a[i]' ∧
+    // ∧ ∀i ∈ [0, end') a[i + (a.length' - begin')] = a[i]') ∧
+    // ∧ ∀i ∈ [size', 2 * capacity) a[i] = null), capacity > a.length)
+    private void ensureCapacity(int capacity) {
+        if (capacity <= elements.length) {
+            return;
+        }
+        Object[] newElements = new Object[2 * capacity];
         if(begin < end) {
             System.arraycopy(elements, begin, newElements, 0, size);
         } else {
             System.arraycopy(elements, begin, newElements, 0, elements.length - begin);
             System.arraycopy(elements, 0, newElements, elements.length - begin, end);
         }
-        return newElements;
-    }
-
-    // pre: capacity > 0
-    // post: (immutable, capacity ≤ a.length ) ∨
-    // ∨ ((begin = 0 ∧ end = size ∧ size = size' ∧ 
-    // ∧ (end' > begin', ∀i ∈ [begin', end') a[i - begin'] = a[i]') ∨ 
-    // ∨ (end' ≤ begin' ∧ size' ≠ 0, ∀i ∈ [begin', a.length') a[i - begin'] = a[i]' ∧  
-    // ∧ ∀i ∈ [0, end') a[i + (a.length' - begin')] = a[i]') ∧ 
-    // ∧ ∀i ∈ [size', 2 * capacity) a[i] = null), capacity > a.length)
-    private void ensureCapacity(int capacity) {
-        if (capacity <= elements.length) {
-            return;
-        }
-        elements = expandQueue(2 * capacity);
+        elements = newElements;
         end = size;
         begin = 0;
     }

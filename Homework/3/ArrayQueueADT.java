@@ -2,8 +2,8 @@
  * Created by Greg on 23.02.2017.
  */
 
-// в даном контракте разрешается не использовать queue, во всех упоминаниях не static полей 
-//он неявный(иначе была бы каша)
+// в даном контракте разрешается не использовать queue, во всех упоминаниях не static полей,  
+// он неявный(иначе была бы каша)
 
 // inv: begin ∈ [0, a.length] ∧ end ∈ [0, a.length] ∧ size ≥ 0 ∧ 
 // ∧ (end > begin, ∀i ∈ [begin, end) a[i] ≠ null ∨ 
@@ -81,46 +81,44 @@ public class ArrayQueueADT {
     }
 
     // pre: queue ≠ null
-    // post:(end > begin, ∀i ∈ [begin, end) R[i - begin] = a[i]) ∨ 
-    // ∨ (end ≤ begin ∧ size ≠ 0, ∀i ∈ [begin, a.length] R[i - begin] = a[i], 
-    // ∀i ∈ [0, end) R[i + (a.length - begin)] = a[i]) ∧ immutable
-    public static Object[] toArray(ArrayQueueADT queue) {
-        return expandQueue(queue, queue.size);
-    }
-
-    // pre: newArraySize ≥ size ∧ queue ≠ null
-    // post: (end > begin, ∀i ∈ [begin, end) R[i - begin] = a[i]) ∨ 
-    // ∨ (end ≤ begin ∧ size ≠ 0, ∀i ∈ [begin, a.length) R[i - begin] = a[i], 
-    // ∀i ∈ [0, end) R[i + (a.length - begin)] = a[i]) ∧ 
-    // ∧ ∀i ∈ [size, newArraySize) R[i] = null ∧ immutable
-    private static Object[] expandQueue(ArrayQueueADT queue, int newArraySize) {
-        Object[] newElements = new Object[newArraySize];
+    // post:(end > begin, R = "[a[begin], ..., a[end - 1]]") ∨
+    // ∨ (end ≤ begin ∧ size ≠ 0, R = "[a[begin], ..., a[a.length - 1], a[0], ..., a[end - 1]]" ∧
+    // ∧ immutable  
+    public static String toStr(ArrayQueueADT queue) {
         if(queue.size == 0) {
-            return newElements;
+            return "[]";
         }
-        if(queue.begin < queue.end) {
-            System.arraycopy(queue.elements, queue.begin, newElements, 0, queue.size);
-        } else {
-            System.arraycopy(queue.elements, queue.begin, newElements, 0, 
-                        queue.elements.length - queue.begin);
-            System.arraycopy(queue.elements, 0, newElements, 
-                        queue.elements.length - queue.begin, queue.end);
+        StringBuilder sb = new StringBuilder();
+        int i = queue.begin;
+        while(i < (queue.begin < queue.end ? 
+                                queue.end : 
+                                queue.end + queue.elements.length)) {
+          sb.append(", ").append(queue.elements[i++ % queue.elements.length]);
         }
-        return newElements;
+        return "[" + sb.substring(2) + "]";
     }
-
+    
     // pre: capacity > 0 ∧ queue ≠ null
     // post: (immutable, capacity ≤ a.length ) ∨
-    // ∨ ((begin = 0 ∧ end = size ∧ size = size' ∧ 
-    // ∧ (end' > begin', ∀i ∈ [begin', end') a[i - begin'] = a[i]') ∨ 
-    // ∨ (end' ≤ begin' ∧ size' ≠ 0, ∀i ∈ [begin', a.length') a[i - begin'] = a[i]' ∧  
-    // ∧ ∀i ∈ [0, end') a[i + (a.length' - begin')] = a[i]') ∧ 
+    // ∨ ((begin = 0 ∧ end = size ∧ size = size' ∧
+    // ∧ (end' > begin', ∀i ∈ [begin', end') a[i - begin'] = a[i]') ∨
+    // ∨ (end' ≤ begin' ∧ size' ≠ 0, ∀i ∈ [begin', a.length') a[i - begin'] = a[i]' ∧
+    // ∧ ∀i ∈ [0, end') a[i + (a.length' - begin')] = a[i]') ∧
     // ∧ ∀i ∈ [size', 2 * capacity) a[i] = null), capacity > a.length)
     private static void ensureCapacity(ArrayQueueADT queue, int capacity) {
         if (capacity <= queue.elements.length) {
             return;
         }
-        queue.elements = expandQueue(queue, 2 * capacity);
+        Object[] newElements = new Object[2 * capacity];
+        if(queue.begin < queue.end) {
+            System.arraycopy(queue.elements, queue.begin, newElements, 0, queue.size);
+        } else {
+            System.arraycopy(queue.elements, queue.begin, newElements, 0, 
+                                        queue.elements.length - queue.begin);
+            System.arraycopy(queue.elements, 0, newElements, 
+                                        queue.elements.length - queue.begin, queue.end);
+        }
+        queue.elements = newElements;
         queue.end = queue.size;
         queue.begin = 0;
     }
