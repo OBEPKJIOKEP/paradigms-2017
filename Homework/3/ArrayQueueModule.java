@@ -2,46 +2,39 @@
  * Created by Greg on 23.02.2017.
  */
 
-// inv: begin ∈ [0, a.length] ∧ end ∈ [0, a.length] ∧ size ≥ 0 ∧
-// ∧ (end > begin, ∀i ∈ [begin, end) a[i] ≠ null ∨
-// ∨ (end ≤ begin ∧ size ≠ 0), ∀i ∈ [begin, a.length] ∪ [0, end) a[i] ≠ null)
+// inv: size > 0, a[0], ... ,a[size - 1] ≠ null) ∨ 
+// ∨ (size = 0, a = ∅) 
 
-// immutable = begin = begin' ∧ end = end' ∧
-// ((end > begin, ∀i ∈ [begin, end) a[i] = a[i]') ∨
-// ∨ (end ≤ begin ∧ size ≠ 0, ∀i ∈ [begin, a.length] ∪ [0, end) a[i] = a[i]'))
+// immutable = (size = size' ∧
+// ∧ ∀i ∈ [0, size) a[i] = a[i]')
 public class ArrayQueueModule {
-    private static int begin = 0, end = 0, size = 0;
+    private static int begin = 0, size = 0;
     private static Object[] elements = new Object[5];
 
     // pre: element ≠ null
-    // post: end = (end' + 1) % a.length ∧ size = size' + 1 ∧
-    // ∧ begin = begin' ∧ a[end'] = element ∧
-    // ∧ (end' > begin, ∀i ∈ [begin, end') a[i] = a[i]') ∨
-    // ∨ (end' ≤ begin ∧ size ≠ 0, ∀i ∈ [begin, a.length] ∪ [0, end') a[i] = a[i]')
+    // post: size = size' + 1 ∧ a[size'] = element ∧
+    // ∧ ∀i ∈ [0, size') a[i] = a[i]'
     public static void enqueue(Object element) {
-        assert element != null;
+        assert element != null : "element = 0!";
 
         ensureCapacity(size + 1);
-        elements[end] = element;
-        end = ++end % elements.length;
+        elements[(begin + size) % elements.length] = element;
         size++;
     }
 
     // pre: size > 0
-    // post: R = a[begin] ∧ immutable
+    // post: R = a[0] ∧ immutable
     public static Object element() {
-        assert size > 0;
+        assert size > 0 : "size = 0!";
 
         return elements[begin];
     }
 
     // pre: size > 0
-    // post: R = a[begin] ∧ begin = (begin' + 1) % a.length ∧
-    // ∧ size = size' - 1 ∧ end = end' ∧
-    // ∧ (end > begin, ∀i ∈ [begin, end) a[i] = a[i]') ∨
-    // ∨ (end ≤ begin ∧ size ≠ 0, ∀i ∈ [begin, a.length] ∪ [0, end) a[i] = a[i]')
+    // post: R = a[0] ∧ size = size' - 1 ∧ 
+    // ∧  ∀i ∈ [1, size) a[i - 1] = a[i]'
     public static Object dequeue() {
-        assert size() > 0;
+        assert size > 0 : "size = 0!";
 
         Object result = elements[begin];
         elements[begin] = null;
@@ -60,49 +53,38 @@ public class ArrayQueueModule {
         return size == 0;
     }
 
-    // post: begin = 0 ∧ end = 0 ∧ size = 0
+    // post: size = 0
     public static void clear() {
         begin = 0;
-        end = 0;
         size = 0;
         elements = new Object[5];
     }
 
-    // post:(end > begin, R = "[a[begin], ..., a[end - 1]]") ∨
-    // ∨ (end ≤ begin ∧ size ≠ 0, R = "[a[begin], ..., a[a.length - 1], a[0], ..., a[end - 1]]" ∧
-    // ∧ immutable  
+    // post: R = "[a[0], ..., a[size - 1]]") ∨ immutable
     public static String toStr() {
         if(size == 0) {
             return "[]";
         }
         StringBuilder sb = new StringBuilder();
         int i = begin;
-        while(i < (begin < end ? end : end + elements.length)) {
-          sb.append(", ").append(elements[i++ % elements.length]);
+        while(i <  begin + size) {
+            sb.append(", ").append(elements[i++ % elements.length]);
         }
         return "[" + sb.substring(2) + "]";
     }
-    
-    // pre: capacity > 0
-    // post: (immutable, capacity ≤ a.length ) ∨
-    // ∨ ((begin = 0 ∧ end = size ∧ size = size' ∧
-    // ∧ (end' > begin', ∀i ∈ [begin', end') a[i - begin'] = a[i]') ∨
-    // ∨ (end' ≤ begin' ∧ size' ≠ 0, ∀i ∈ [begin', a.length') a[i - begin'] = a[i]' ∧
-    // ∧ ∀i ∈ [0, end') a[i + (a.length' - begin')] = a[i]') ∧
-    // ∧ ∀i ∈ [size', 2 * capacity) a[i] = null), capacity > a.length)
+
     private static void ensureCapacity(int capacity) {
         if (capacity <= elements.length) {
             return;
         }
         Object[] newElements = new Object[2 * capacity];
-        if(begin < end) {
+        if (begin + size < elements.length) {
             System.arraycopy(elements, begin, newElements, 0, size);
         } else {
             System.arraycopy(elements, begin, newElements, 0, elements.length - begin);
-            System.arraycopy(elements, 0, newElements, elements.length - begin, end);
+            System.arraycopy(elements, 0, newElements, elements.length - begin, (begin + size) % elements.length);
         }
         elements = newElements;
-        end = size;
         begin = 0;
     }
 }
