@@ -4,7 +4,7 @@
 public class LinkedQueue extends AbstractQueue{
     private Node begin = null, end = null;
 
-    public void enqueueImpl(Object element) {
+    protected void enqueueImpl(Object element) {
         Node prevEnd = end;
         end = new Node(element, null);
         if (size == 0) {
@@ -12,20 +12,13 @@ public class LinkedQueue extends AbstractQueue{
         } else {
             prevEnd.next = end;
         }
-        /*if(size == 0) {
-            begin = new Node(element, null);
-            end = begin;
-        } else {
-            end.next = new Node(element, null);
-            end = end.next;
-        }*/
     }
 
-    public Object element() {
-            return begin.value;
+    protected Object elementImpl() {
+        return begin.value;
     }
 
-    public Object dequeueImpl() {
+    protected Object dequeueImpl() {
         Object result = begin.value;
         begin = begin.next;
         if(size == 1) {
@@ -34,7 +27,7 @@ public class LinkedQueue extends AbstractQueue{
         return result;
     }
 
-    public void clearImpl() {
+    protected void clearImpl() {
         begin = null;
         end = null;
     }

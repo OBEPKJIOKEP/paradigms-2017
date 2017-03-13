@@ -20,7 +20,7 @@ public interface Queue {
     // ∧  ∀i ∈ [1, size) a[i - 1] = a[i]'
     Object dequeue();
     // post: R = size ∧ immutable
-    int size();]
+    int size();
     // post: R = (size == 0) ∧ immutable
     boolean isEmpty();
     // post: size = 0

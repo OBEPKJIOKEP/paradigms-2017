@@ -5,23 +5,23 @@ public class ArrayQueue extends AbstractQueue{
     private int begin = 0;
     private Object[] elements = new Object[5];
 
-    public void enqueueImpl(Object element) {
+    protected void enqueueImpl(Object element) {
         ensureCapacity(size + 1);
         elements[(begin + size) % elements.length] = element;
     }
 
-    public Object element() {
+    protected Object elementImpl() {
         return elements[begin];
     }
 
-    public Object dequeueImpl() {
+    protected Object dequeueImpl() {
         Object result = elements[begin];
         elements[begin] = null;
         begin = ++begin % elements.length;
         return result;
     }
 
-    public void clearImpl() {
+    protected void clearImpl() {
         elements = new Object[5];
         begin = 0;
     }
