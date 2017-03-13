@@ -12,7 +12,7 @@ public class ArrayQueueModuleTest {
     public static void printQueue() {
         while (!ArrayQueueModule.isEmpty()) {
             System.out.println(
-                ArrayQueueModule.size() + " " 
+                ArrayQueueModule.size() + " " + 
                 ArrayQueueModule.element() + " " +
                 ArrayQueueModule.dequeue()
             );
@@ -23,17 +23,16 @@ public class ArrayQueueModuleTest {
         fill();
         printQueue();
         }
-    }
 
     public static void clearTest() {
         fill(0, 10);
         ArrayQueueModule.clear();
-        fill(10, 20)
+        fill(10, 20);
         printQueue();
     }
 
-    public static pushPopTest() {
-        for (int i = 0; i < 100; i++)
+    public static void pushPopTest() {
+        for (int i = 0; i < 20; i++)
         {
             ArrayQueueModule.enqueue(i);
             printQueue();

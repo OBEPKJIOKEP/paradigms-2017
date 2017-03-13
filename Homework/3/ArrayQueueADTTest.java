@@ -1,50 +1,50 @@
-public class ArrayQueueModuleTest {
-    public static void fill(int from, int to) {
+public class ArrayQueueADTTest {
+    public static void fill(ArrayQueueADT queue, int from, int to) {
         for (int i = from; i < to; i++) {
-            ArrayQueueModule.enqueue(i);
+            ArrayQueueADT.enqueue(queue, i);
         }
     }
 
-    public static void fill() {
-        fill(0, 20);
+    public static void fill(ArrayQueueADT queue) {
+        fill(queue, 0, 20);
     }
 
-    public static void printQueue() {
-        while (!ArrayQueueModule.isEmpty()) {
+    public static void printQueue(ArrayQueueADT queue) {
+        while (!ArrayQueueADT.isEmpty(queue)) {
             System.out.println(
-                ArrayQueueModule.size() + " " 
-                ArrayQueueModule.element() + " " +
-                ArrayQueueModule.dequeue()
+                ArrayQueueADT.size(queue) + " " +
+                ArrayQueueADT.element(queue) + " " +
+                ArrayQueueADT.dequeue(queue)
             );
         }
     }
 
-    public static void linearTest() {
-        fill();
-        printQueue();
+    public static void linearTest(ArrayQueueADT queue) {
+        fill(queue);
+        printQueue(queue);
         }
+
+    public static void clearTest(ArrayQueueADT queue) {
+        fill(queue, 0, 10);
+        ArrayQueueADT.clear(queue);
+        fill(queue, 10, 20);
+        printQueue(queue);
     }
 
-    public static void clearTest() {
-        fill(0, 10);
-        ArrayQueueModule.clear();
-        fill(10, 20)
-        printQueue();
-    }
-
-    public static pushPopTest() {
-        for (int i = 0; i < 100; i++)
+    public static void pushPopTest(ArrayQueueADT queue) {
+        for (int i = 0; i < 20; i++)
         {
-            ArrayQueueModule.enqueue(i);
-            printQueue();
+            ArrayQueueADT.enqueue(queue, i);
+            printQueue(queue);
         }
     }
     public static void main(String[] args) {
-       System.out.println("Running linear test:");
-       linearTest();
-       System.out.println("Running clear test: ");
-       clearTest();
-       System.out.println("Running pushpop test: ");
-       pushPopTest();
+        ArrayQueueADT queue = new ArrayQueueADT();
+        System.out.println("Running linear test:");
+        linearTest(queue);
+        System.out.println("Running clear test: ");
+        clearTest(queue);
+        System.out.println("Running pushpop test: ");
+        pushPopTest(queue);
     }
 }
